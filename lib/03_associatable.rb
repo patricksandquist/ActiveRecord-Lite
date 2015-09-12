@@ -10,18 +10,18 @@ class AssocOptions
   )
 
   def model_class
-    # ...
+    class_name.to_s.constantize
   end
 
   def table_name
-    # ...
+    model_class.table_name
   end
 end
 
 class BelongsToOptions < AssocOptions
   def initialize(name, options = {})
-    self.class_name = name.camelcase
-    self.foreign_key = (name.underscore + "_id").to_sym
+    self.class_name = name.to_s.camelcase
+    self.foreign_key = (name.to_s.underscore + "_id").to_sym
     self.primary_key = "id".to_sym
 
     options.each do |option, value|
@@ -32,7 +32,7 @@ end
 
 class HasManyOptions < AssocOptions
   def initialize(name, self_class_name, options = {})
-    self.class_name = name.singularize.camelcase
+    self.class_name = name.to_s.singularize.camelcase
     self.foreign_key = (self_class_name.underscore + "_id").to_sym
     self.primary_key = "id".to_sym
 
@@ -45,11 +45,21 @@ end
 module Associatable
   # Phase IIIb
   def belongs_to(name, options = {})
-    # ...
+    options = BelongsToOptions.new(name, options)
+    define_method("#{name}") do
+      foreign_key_value = self.send(options.foreign_key)
+      target_class = options.model_class
+      target_class.where({id: foreign_key_value}).first
+    end
   end
 
   def has_many(name, options = {})
-    # ...
+    # options = HasManyOptions.new(name, options)
+    # define_method("#{name}") do
+    #   foreign_key_value = self.send(options.foreign_key)
+    #   target_class = options.model_class
+    #   target_class.where({id: foreign_key_value}).first
+    # end
   end
 
   def assoc_options
@@ -58,5 +68,5 @@ module Associatable
 end
 
 class SQLObject
-  # Mixin Associatable here...
+  extend Associatable
 end
