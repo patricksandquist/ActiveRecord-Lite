@@ -1,8 +1,33 @@
-require_relative '03_associatable'
+require_relative './searchable'
 
-# Phase IV
 module Associatable
-  # Remember to go back to 04_associatable to write ::assoc_options
+  def belongs_to(name, options = {})
+    self.assoc_options[name] = BelongsToOptions.new(name, options)
+
+    define_method(name) do
+      options = self.class.assoc_options[name]
+
+      key_val = self.send(options.foreign_key)
+      options
+        .model_class
+        .where(options.primary_key => key_val)
+        .first
+    end
+  end
+
+  def has_many(name, options = {})
+    self.assoc_options[name] =
+      HasManyOptions.new(name, self.name, options)
+
+    define_method(name) do
+      options = self.class.assoc_options[name]
+
+      key_val = self.send(options.primary_key)
+      options
+        .model_class
+        .where(options.foreign_key => key_val)
+    end
+  end
 
   def has_one_through(name, through_name, source_name)
     define_method(name) do
@@ -34,5 +59,10 @@ module Associatable
 
       source_options.model_class.parse_all(results).first
     end
+  end
+
+  def assoc_options
+    @assoc_options ||= {}
+    @assoc_options
   end
 end
