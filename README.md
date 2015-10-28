@@ -1,4 +1,4 @@
-# active-record
+# ActiveRecord-Lite
 An ORM inspired by the functionality of ActiveRecord
 
 ### Motivation
