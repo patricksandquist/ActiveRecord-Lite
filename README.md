@@ -60,3 +60,6 @@ human_options.primary_key # => :id
 
 cat.home # => house the cat's owner lives in.
 ```
+
+### License
+ActiveRecord-Lite is released under the [MIT License](http://www.opensource.org/licenses/MIT).
